@@ -18,7 +18,6 @@
             <h2><a href="{{ url_for('detail', quote_id=quote.id) }}">{{ quote.text_en[:50] }}{% if quote.text_en|length > 50 %}...{% endif %}</a></h2>
             <p class="post-date">{{ quote.gmt_create }}</p>
             <p class="post-excerpt">{{ quote.text_en[:150] }}...</p>
-            {% endif %}
             <a href="{{ url_for('detail', quote_id=quote.id) }}" class="read-more">Read More</a>
         </div>
     </article>

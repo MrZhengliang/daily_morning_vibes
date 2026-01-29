@@ -13,6 +13,14 @@ from aliyunsdkcore import client as aliyun_client
 from aliyunsdksts.request.v20150401 import AssumeRoleRequest
 
 # 1. 初始化 SiliconFlow 客户端
+# 彻底禁用代理，防止 OSS 上传 502 错误
+os.environ['HTTP_PROXY'] = ''
+os.environ['HTTPS_PROXY'] = ''
+os.environ['http_proxy'] = ''
+os.environ['https_proxy'] = ''
+os.environ['NO_PROXY'] = '*'
+os.environ['no_proxy'] = '*'
+
 client = OpenAI(
     api_key=Config.SILICONFLOW_API_KEY, 
     base_url=Config.SILICONFLOW_BASE_URL
@@ -54,13 +62,9 @@ def get_sts_token():
 def upload_to_oss(local_file_path, filename):
     try:
         print(f"正在上传 {filename} 到 OSS (使用 STS)...")
-        # 强制不使用代理 (排除网络环境干扰)
-        os.environ['HTTP_PROXY'] = ''
-        os.environ['HTTPS_PROXY'] = ''
         
         sts = get_sts_token()
         if not sts:
-            print("无法获取STS Token，尝试使用普通Auth...")
             auth = oss2.Auth(Config.OSS_ACCESS_KEY_ID, Config.OSS_ACCESS_KEY_SECRET)
         else:
             auth = oss2.StsAuth(sts['access_key_id'], sts['access_key_secret'], sts['security_token'])
@@ -70,16 +74,15 @@ def upload_to_oss(local_file_path, filename):
         if not endpoint.startswith('http'):
             endpoint = 'http://' + endpoint
             
-        print(f"使用 Endpoint: {endpoint}")
         bucket = oss2.Bucket(auth, endpoint, Config.OSS_BUCKET_NAME)
         with open(local_file_path, 'rb') as fileobj:
             bucket.put_object(filename, fileobj)
         return Config.OSS_URL_PREFIX + filename
     except Exception as e:
         print(f"OSS上传失败: {e}")
-        # 尝试获取状态码，如果存在的话
         status = getattr(e, 'status', 'N/A')
-        print(f"错误状态码: {status}")
+        if status != 'N/A':
+            print(f"错误状态码: {status}")
         return None
 
 
@@ -109,12 +112,29 @@ def generate_simple_image(text_en, filename):
 
     d = ImageDraw.Draw(img)
     
-    # 3. 加载字体 (务必传一个好看的英文手写体或衬线体到目录，比如 'PlayfairDisplay.ttf')
+    # 3. 加载字体
     font_size = 60
-    try:
-        font = ImageFont.truetype("PlayfairDisplay.ttf", font_size)
-    except:
+    font = None
+    # 尝试常见的系统字体路径 (macOS)
+    font_paths = [
+        "PlayfairDisplay.ttf", 
+        "/System/Library/Fonts/Supplemental/Arial.ttf",
+        "/System/Library/Fonts/Cache/Arial.ttf",
+        "/Library/Fonts/Arial.ttf"
+    ]
+    
+    for path in font_paths:
+        try:
+            if os.path.exists(path) or path == "PlayfairDisplay.ttf":
+                font = ImageFont.truetype(path, font_size)
+                break
+        except:
+            continue
+            
+    if font is None:
         font = ImageFont.load_default()
+        # 如果是默认字体，强制把非 latin-1 字符替换掉，防止 UnicodeEncodeError
+        text_en = text_en.encode('latin-1', 'replace').decode('latin-1')
 
     # 4. 文字自动换行与居中
     # 根据字数动态调整每行字符数
@@ -222,8 +242,6 @@ def main():
                 print(f"跳过入库，因为 OSS 上传失败")
             
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             print(f"单条处理失败: {e}")
             conn.rollback()
         finally:

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ quote.text_en[:50] }} - Daily Morning Vibes{% endblock %}
+
+{% block content %}
+<article class="post-detail">
+    <header class="post-header">
+        <h1>{{ quote.text_en[:100] }}{% if quote.text_en|length > 100 %}...{% endif %}</h1>
+        <p class="post-meta">Published on {{ quote.gmt_create }} | Category: {{ quote.category }}</p>
+    </header>
+
+    {% if quote.image_oss_url %}
+    <div class="post-image-container">
+        <img src="{{ quote.image_oss_url }}" alt="Morning Vibe" class="post-detail-image">
+    </div>
+    {% endif %}
+
+    <div class="post-body">
+        <div class="ad-placeholder top-ad">
+            <!-- Ad space for high-value ads -->
+            <p>Advertisement Space (High-Value Ad)</p>
+        </div>
+
+        <div class="content-text">
+            <div class="en-content">
+                {{ quote.text_en | safe }}
+            </div>
+            {% if quote.text_cn %}
+            <div class="cn-content" style="margin-top: 20px; color: #666; font-style: italic;">
+                {{ quote.text_cn | safe }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="ad-placeholder bottom-ad">
+            <!-- Ad space for high-value ads -->
+            <p>Advertisement Space (High-Value Ad)</p>
+        </div>
+    </div>
+    
+    <div class="post-footer">
+        <a href="/" class="back-link">← Back to Home</a>
+    </div>
+</article>
+{% endblock %}

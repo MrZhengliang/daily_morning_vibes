@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finding joy in the small, quiet moments before the - Daily Morning Vibes</title>
+    <meta name="description" content="Get your daily dose of morning inspiration and vibes.">
+    <link rel="stylesheet" href="../static/style.css">
+    
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="container">
+                <a href="/" class="logo">Morning Vibes</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        
+<article class="post-detail">
+    <header class="post-header">
+        <h1>Finding joy in the small, quiet moments before the world gets loud.</h1>
+        <p class="post-meta">Published on 2026-01-29 23:22:06 | Category: morning</p>
+    </header>
+
+    
+    <div class="post-image-container">
+        <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643" alt="Morning Vibe" class="post-detail-image">
+    </div>
+    
+
+    <div class="post-body">
+        <div class="ad-placeholder top-ad">
+            <!-- Ad space for high-value ads -->
+            <p>Advertisement Space (High-Value Ad)</p>
+        </div>
+
+        <div class="content-text">
+            <div class="en-content">
+                Finding joy in the small, quiet moments before the world gets loud.
+            </div>
+            
+            <div class="cn-content" style="margin-top: 20px; color: #666; font-style: italic;">
+                在世界变得喧嚣之前，在微小而安静的时刻寻找快乐。
+            </div>
+            
+        </div>
+
+        <div class="ad-placeholder bottom-ad">
+            <!-- Ad space for high-value ads -->
+            <p>Advertisement Space (High-Value Ad)</p>
+        </div>
+    </div>
+    
+    <div class="post-footer">
+        <a href="/" class="back-link">← Back to Home</a>
+    </div>
+</article>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Daily Morning Vibes. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

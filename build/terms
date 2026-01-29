@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Daily Morning Vibes</title>
+    <meta name="description" content="Get your daily dose of morning inspiration and vibes.">
+    <link rel="stylesheet" href="static/style.css">
+    
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="container">
+                <a href="/" class="logo">Morning Vibes</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        
+<div class="static-page">
+    <h1>Terms of Service</h1>
+    <p>By using Daily Morning Vibes, you agree to our terms of service.</p>
+    <p>The content provided on this website is for informational purposes only.</p>
+</div>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Daily Morning Vibes. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

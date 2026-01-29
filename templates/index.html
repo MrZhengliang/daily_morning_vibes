@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Daily Morning Vibes{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Start Your Day Right</h1>
+    <p>Discover beautiful moments and inspiring stories.</p>
+</section>
+
+<div class="post-grid">
+    {% for quote in quotes %}
+    <article class="post-card">
+        {% if quote.image_oss_url %}
+        <img src="{{ quote.image_oss_url }}" alt="Morning Vibe" class="post-image">
+        {% endif %}
+        <div class="post-content">
+            <h2><a href="{{ url_for('detail', quote_id=quote.id) }}">{{ quote.text_en[:50] }}{% if quote.text_en|length > 50 %}...{% endif %}</a></h2>
+            <p class="post-date">{{ quote.gmt_create }}</p>
+            <p class="post-excerpt">{{ quote.text_en[:150] }}...</p>
+            {% if quote.text_cn %}
+            <p class="post-excerpt-cn">{{ quote.text_cn[:100] }}...</p>
+            {% endif %}
+            <a href="{{ url_for('detail', quote_id=quote.id) }}" class="read-more">Read More</a>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% endblock %}

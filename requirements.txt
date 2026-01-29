@@ -1,0 +1,8 @@
+flask
+pymysql
+gunicorn
+python-dotenv
+openai 
+oss2 
+Pillow
+Frozen-Flask

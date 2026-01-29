@@ -6,3 +6,6 @@ openai
 oss2 
 Pillow
 Frozen-Flask
+requests
+aliyun-python-sdk-sts
+aliyun-python-sdk-core

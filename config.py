@@ -24,7 +24,7 @@ class Config:
     }
 
     # Google AI Configuration
-    GOOGLE_AI_API_KEY = os.getenv('GOOGLE_AI_API_KEY', '')
+    GOOGLE_AI_API_KEY = 'AIzaSyCl2HMTgyub0pF5UF3V6Z8EIidky1RolAY'
 
     # SiliconFlow Configuration
     SILICONFLOW_API_KEY = os.getenv('SILICONFLOW_API_KEY', '')

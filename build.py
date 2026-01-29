@@ -1,4 +1,5 @@
 import os
+import json
 from flask_frozen import Freezer
 from app import app, get_db_connection  # 导入你原来的 Flask app
 
@@ -26,9 +27,22 @@ def detail():
 if __name__ == '__main__':
     print("开始生成静态网站...")
     freezer.freeze()
-    print("静态网站生成完毕！文件在 /build 目录下。")
     
-    # 特殊处理：Vercel 需要一个 404.html，我们可以复制首页过去或者单独写
-    # 这里简单处理，创建一个 CNAME 文件用于绑定域名 (GitHub Pages 需要，Vercel 不需要但留着无妨)
+    # === 新增：自动生成 Vercel 配置文件 ===
+    # 这告诉 Vercel：开启 Clean URLs (去掉 .html 后缀也能访问)
+    vercel_config = {
+        "cleanUrls": True,
+        "trailingSlash": False
+    }
+    
+    # 把配置文件写入 build 文件夹
+    with open('build/vercel.json', 'w') as f:
+        json.dump(vercel_config, f)
+    
+    print("✅ vercel.json 配置已生成！")
+    
+    # ... (原来的 CNAME 代码保持不变) ...
     with open('build/CNAME', 'w') as f:
         f.write('dailymorningvibes.com')
+    
+    print("静态网站生成完毕！文件在 /build 目录下。")

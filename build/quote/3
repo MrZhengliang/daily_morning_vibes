@@ -56,9 +56,12 @@
 
     </main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 Daily Morning Vibes. All rights reserved.</p>
+    <footer class="bg-gray-800 text-white p-8 mt-12 text-center">
+        <p>&copy; 2026 Daily Morning Vibes. All rights reserved.</p>
+        <div class="mt-4 space-x-4 text-sm text-gray-400">
+            <a href="/privacy" class="hover:text-white">Privacy Policy</a>
+            <a href="/terms" class="hover:text-white">Terms of Service</a>
+            <a href="mailto:contact@dailymorningvibes.com" class="hover:text-white">Contact Us</a>
         </div>
     </footer>
 </body>

@@ -72,15 +72,15 @@ def sitemap():
     return xml, {'Content-Type': 'application/xml'}
 
 # 静态页面的路由（Vercel 需要）
-@app.route('/privacy')
+@app.route('/privacy.html')
 def privacy():
     return render_template('privacy.html')
 
-@app.route('/terms')
+@app.route('/terms.html')
 def terms():
     return render_template('terms.html')
 
-@app.route('/about')
+@app.route('/about.html')
 def about():
     return render_template('about.html')
 

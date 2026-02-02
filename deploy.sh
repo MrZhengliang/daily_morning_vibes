@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 1. 生产内容 (你的生成脚本)
-python3 generator.py
+python3 generatorclaude.py
 
 # 2. 静态化打包
 python3 build.py

@@ -2,14 +2,12 @@ import os
 import json
 import time
 import pymysql
-import oss2
 import random
 import textwrap
+import shutil
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from datetime import datetime
 from config import Config
-from aliyunsdkcore import client as aliyun_client
-from aliyunsdksts.request.v20150401 import AssumeRoleRequest
 from zhipuai import ZhipuAI
 
 # ZhipuAI API Key
@@ -21,115 +19,92 @@ client = ZhipuAI(api_key=ZHIPUAI_API_KEY)
 def get_db_connection():
     return Config.get_db_connection()
 
-def get_sts_token():
-    try:
-        # OSS 访问强制禁用代理
-        os.environ['NO_PROXY'] = '*'
-        endpoint = Config.OSS_ENDPOINT.replace('https://', '').replace('http://', '')
-        region = endpoint.split('.')[0]
-        if region.startswith('oss-'):
-            region = region[4:]
-        else:
-            region = 'cn-hangzhou'
-
-        clt = aliyun_client.AcsClient(Config.OSS_ACCESS_KEY_ID, Config.OSS_ACCESS_KEY_SECRET, region)
-        request = AssumeRoleRequest.AssumeRoleRequest()
-        request.set_RoleArn(Config.OSS_ROLE_ARN)
-        request.set_RoleSessionName('oss-session')
-        request.set_DurationSeconds(3600)
-
-        response = clt.do_action_with_exception(request)
-        if response is None:
-            return None
-
-        data = json.loads(str(response, encoding='utf-8') if isinstance(response, bytes) else response)
-        return {
-            'access_key_id': data['Credentials']['AccessKeyId'],
-            'access_key_secret': data['Credentials']['AccessKeySecret'],
-            'security_token': data['Credentials']['SecurityToken']
-        }
-    except Exception as e:
-        print(f"获取STS Token失败: {e}")
-        return None
-
-def upload_to_oss(local_file_path, filename):
-    try:
-        # OSS 访问强制禁用代理
-        os.environ['NO_PROXY'] = '*'
-        print(f"正在上传 {filename} 到 OSS (使用 STS)...")
-
-        sts = get_sts_token()
-        if not sts:
-            auth = oss2.Auth(Config.OSS_ACCESS_KEY_ID, Config.OSS_ACCESS_KEY_SECRET)
-        else:
-            auth = oss2.StsAuth(sts['access_key_id'], sts['access_key_secret'], sts['security_token'])
-
-        endpoint = Config.OSS_ENDPOINT
-        if not endpoint.startswith('http'):
-            endpoint = 'http://' + endpoint
-
-        bucket = oss2.Bucket(auth, endpoint, Config.OSS_BUCKET_NAME)
-        with open(local_file_path, 'rb') as fileobj:
-            bucket.put_object(filename, fileobj)
-        return Config.OSS_URL_PREFIX + filename
-    except Exception as e:
-        print(f"OSS上传失败: {e}")
-        status = getattr(e, 'status', 'N/A')
-        if status != 'N/A':
-            print(f"错误状态码: {status}")
-        return None
-
 def generate_simple_image(text_en, filename):
-    bg_dir = "assets/backgrounds"
-    if not os.path.exists(bg_dir) or not os.listdir(bg_dir):
+    """
+    高端版：随机选取一张风景图 -> 加半透明遮罩 -> 写上高大上的英文
+    """
+    # 1. 随机选一张底图
+    bg_dir = os.path.join("assets", "backgrounds")
+
+    # 确保底图目录存在，如果不存在则创建
+    if not os.path.exists(bg_dir):
+        os.makedirs(bg_dir)
+
+    # 如果没有底图，就用橙色纯色兜底
+    if not os.listdir(bg_dir):
+        print(f"警告: {bg_dir} 为空，使用纯色背景。请放入 .jpg 图片！")
         img = Image.new('RGB', (1080, 1080), color=(255, 165, 0))
     else:
-        bg_files = [x for x in os.listdir(bg_dir) if x.endswith(('.jpg', '.png'))]
-        if not bg_files:
+        # 过滤出图片文件
+        valid_images = [x for x in os.listdir(bg_dir) if x.lower().endswith(('.jpg', '.png', '.jpeg'))]
+        if not valid_images:
             img = Image.new('RGB', (1080, 1080), color=(255, 165, 0))
         else:
-            bg_file = random.choice(bg_files)
+            bg_file = random.choice(valid_images)
             img = Image.open(os.path.join(bg_dir, bg_file)).convert('RGB')
+            # 强制裁剪/缩放为 1080x1080
             img = img.resize((1080, 1080))
 
-    overlay = Image.new('RGBA', img.size, (0, 0, 0, 100))
+    # 2. 加一层黑色半透明遮罩 (让白色文字更清晰)
+    # 最后一个参数 80 是透明度 (0全透 - 255全黑)，可根据喜好调整
+    overlay = Image.new('RGBA', img.size, (0, 0, 0, 80))
     img.paste(Image.alpha_composite(img.convert('RGBA'), overlay), (0, 0), overlay)
     img = img.convert('RGB')
+
     d = ImageDraw.Draw(img)
 
+    # 3. 加载字体
     font_size = 60
     font = None
+    # 尝试加载项目根目录下的字体文件，或者系统字体
     font_paths = [
-        "PlayfairDisplay.ttf",
-        "/System/Library/Fonts/Supplemental/Arial.ttf",
-        "/System/Library/Fonts/Cache/Arial.ttf",
-        "/Library/Fonts/Arial.ttf"
+        "PlayfairDisplay.ttf",  # 推荐：把你下载的好看字体放在根目录
+        "Arial.ttf",
+        "/System/Library/Fonts/Supplemental/Arial.ttf", # Mac路径
+        "/Library/Fonts/Arial.ttf" # Mac路径
     ]
 
     for path in font_paths:
-        try:
-            if os.path.exists(path) or path == "PlayfairDisplay.ttf":
+        if os.path.exists(path):
+            try:
                 font = ImageFont.truetype(path, font_size)
                 break
-        except:
-            continue
+            except:
+                continue
 
     if font is None:
         font = ImageFont.load_default()
+        # 如果是默认字体，强制处理编码防止报错
         text_en = text_en.encode('latin-1', 'replace').decode('latin-1')
 
+    # 4. 文字自动换行与居中
+    # 根据字数动态调整每行字符数，字越多每行越宽
     wrap_width = 25
     lines = textwrap.wrap(text_en, width=wrap_width)
+
+    # 计算总高度
     line_height = font_size * 1.5
     total_text_height = len(lines) * line_height
-    y_text = (1080 - total_text_height) / 2
+    y_text = (1080 - total_text_height) / 2 # 垂直居中
 
     for line in lines:
-        d.text((100, y_text), line, fill=(255, 255, 255), font=font, stroke_width=2, stroke_fill='black')
+        # 绘制文字阴影/描边 (黑色) 让文字更凸显
+        d.text((102, y_text+2), line, fill=(0, 0, 0), font=font)
+        # 绘制文字主体 (白色)
+        # 注意：Pillow 旧版本可能不支持 stroke_width，如果报错删掉 stroke 参数
+        d.text((100, y_text), line, fill=(255, 255, 255), font=font)
         y_text += line_height
 
-    d.text((350, 950), "DailyMorningVibes.com", fill=(200, 200, 200), font=font)
-    local_path = f"temp_zhipu_{filename}"
+    # 5. 加上域名水印
+    try:
+        watermark_font = ImageFont.truetype(font_paths[0], 40) if font else ImageFont.load_default()
+    except:
+        watermark_font = ImageFont.load_default()
+
+    d.text((350, 950), "DailyMorningVibes.com", fill=(200, 200, 200), font=watermark_font)
+
+    # 保存到临时路径
+    local_path = f"temp_{filename}"
     img.save(local_path)
     return local_path
 
@@ -179,6 +154,7 @@ def fetch_quotes_from_zhipuai():
 
 def main():
     print(f"[{datetime.now()}] 启动 ZhipuAI GLM-4.7 生产线...")
+
     quotes = fetch_quotes_from_zhipuai()
     if not quotes:
         print("未获取到内容，请检查 ZhipuAI API Key。")
@@ -190,33 +166,53 @@ def main():
     cursor.execute("SET NAMES utf8mb4")
 
     count = 0
+
+    # === 关键修改：定义本地静态资源目录 ===
+    static_img_dir = os.path.join("static", "images")
+    if not os.path.exists(static_img_dir):
+        os.makedirs(static_img_dir)
+        print(f"创建目录: {static_img_dir}")
+
     for item in quotes:
-        local_img_path = None
+        temp_img_path = None
         try:
             file_suffix = str(int(time.time() * 1000))[-6:]
             filename = f"zhipu_{file_suffix}_{count}.jpg"
-            print(f"正在处理第 {count+1} 条: {item['text_en'][:30]}...")
-            local_img_path = generate_simple_image(item['text_en'], filename)
-            oss_url = upload_to_oss(local_img_path, f"daily_quotes/{filename}")
 
-            if oss_url:
-                sql = "INSERT INTO content_library (category, text_cn, text_en, image_oss_url, status) VALUES (%s, %s, %s, %s, 1)"
-                cursor.execute(sql, (item['category'], item['text_cn'], item['text_en'], oss_url))
-                conn.commit()
-                count += 1
-                print(f"成功入库: {item['text_en'][:20]}...")
-            else:
-                print(f"跳过入库，因为 OSS 上传失败")
+            print(f"正在处理第 {count+1} 条...")
+
+            # 1. 生成图片 (临时文件)
+            temp_img_path = generate_simple_image(item['text_en'], filename)
+
+            # 2. 移动图片到 static/images 文件夹
+            target_path = os.path.join(static_img_dir, filename)
+            shutil.move(temp_img_path, target_path)
+
+            # 3. 生成存入数据库的 URL (相对路径)
+            # 这样 HTML 里的 <img src="/static/images/xxx.jpg"> 就能找到它
+            db_image_url = f"/static/images/{filename}"
+
+            # 4. 入库
+            # 注意：仍然存入 image_oss_url 字段，但内容是本地路径
+            sql = """
+            INSERT INTO content_library (category, text_cn, text_en, image_oss_url, status)
+            VALUES (%s, %s, %s, %s, 1)
+            """
+            cursor.execute(sql, (item['category'], item['text_cn'], item['text_en'], db_image_url))
+            conn.commit()
+            count += 1
+            print(f"成功保存: {db_image_url}")
+
         except Exception as e:
             print(f"单条处理失败: {e}")
             conn.rollback()
-        finally:
-            if local_img_path and os.path.exists(local_img_path):
-                os.remove(local_img_path)
+            # 如果出错且临时文件还存在，清理掉
+            if temp_img_path and os.path.exists(temp_img_path):
+                os.remove(temp_img_path)
 
     cursor.close()
     conn.close()
-    print(f"任务结束，ZhipuAI GLM-4.7 新增 {count} 条资产。")
+    print(f"任务结束，新增 {count} 条本地内容。请执行 'python3 build.py' 并 git push。")
 
 if __name__ == "__main__":
     main()

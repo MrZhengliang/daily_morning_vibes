@@ -118,47 +118,45 @@ def generate_simple_image(text_en, filename):
     return local_path
 
 def fetch_quotes_from_zhipuai():
-    """核心：调用 ZhipuAI GLM-4.7 生成 JSON"""
+    """核心：调用 ZhipuAI GLM-4.7 生成 JSON - 生成不同分类的内容"""
     system_prompt = """
-    You are a creative content curator specializing in morning inspiration.
+    You are a creative content curator specializing in inspirational quotes across different themes.
     Strictly output raw JSON only. Do not use Markdown (no ```json).
     """
 
     user_prompt = """
-    Generate 5 UNIQUE and DIVERSE morning quotes. CRITICAL REQUIREMENTS:
+    Generate 5 UNIQUE quotes, each from a DIFFERENT category. CRITICAL REQUIREMENTS:
 
-    1. **DIVERSITY**: Each quote must explore a DIFFERENT theme/angle:
-       - Nature imagery (sunrise, light, seasons)
-       - Personal growth and new beginnings
-       - Gratitude and mindfulness
-       - Productivity and determination
-       - Hope and optimism
-       - Inner peace and self-reflection
-       - Time and seizing the moment
-       - Dreams and aspirations
-       - Kindness and spreading positivity
-       - Simplicity and finding joy
+    **Categories (one quote per category):**
+    1. "morning" - About sunrise, new beginnings, fresh starts
+    2. "motivation" - About strength, perseverance, achieving goals
+    3. "gratitude" - About thankfulness, appreciation, counting blessings
+    4. "mindfulness" - About being present, meditation, inner peace
+    5. "positivity" - About optimism, positive thinking, spreading joy
 
-    2. **UNIQUENESS**:
-       - NO similar sentence structures
-       - NO repeating the same concept with different words
-       - Each quote must be distinctly different from others
-       - Avoid cliché phrases like "every day is a new day"
+    **For each category:**
+    - Match the quote's theme to the category
+    - Keep quotes concise (under 25 words)
+    - Use vivid imagery and metaphors
+    - Make them thought-provoking and unique
+    - Avoid cliché phrases
+    - Draw from diverse sources: literature, philosophy, poetry, wisdom traditions
 
-    3. **QUALITY**:
-       - Use vivid imagery and metaphors
-       - Keep quotes concise (under 25 words)
-       - Make them thought-provoking, not generic
-       - Draw from diverse sources: literature, philosophy, poetry, wisdom traditions
+    **DIVERSITY RULES:**
+    - Each quote MUST be from a different category
+    - NO similar sentence structures between quotes
+    - Each quote must be distinctly different in theme and expression
 
     Format (JSON only):
     [
         {
             "text_cn": "Chinese translation - warm and poetic",
             "text_en": "Original English quote - unique and creative",
-            "category": "morning"
+            "category": "one of: morning, motivation, gratitude, mindfulness, positivity"
         }
     ]
+
+    IMPORTANT: Generate exactly 5 quotes, one from each of the 5 categories listed above.
     """
 
     try:

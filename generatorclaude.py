@@ -111,17 +111,42 @@ def generate_simple_image(text_en, filename):
 def fetch_quotes_from_zhipuai():
     """核心：调用 ZhipuAI GLM-4.7 生成 JSON"""
     system_prompt = """
-    You are a helpful assistant that generates inspiring content.
+    You are a creative content curator specializing in morning inspiration.
     Strictly output raw JSON only. Do not use Markdown (no ```json).
     """
 
     user_prompt = """
-    Please generate 5 unique, inspiring "Morning Quotes".
-    Format:
+    Generate 5 UNIQUE and DIVERSE morning quotes. CRITICAL REQUIREMENTS:
+
+    1. **DIVERSITY**: Each quote must explore a DIFFERENT theme/angle:
+       - Nature imagery (sunrise, light, seasons)
+       - Personal growth and new beginnings
+       - Gratitude and mindfulness
+       - Productivity and determination
+       - Hope and optimism
+       - Inner peace and self-reflection
+       - Time and seizing the moment
+       - Dreams and aspirations
+       - Kindness and spreading positivity
+       - Simplicity and finding joy
+
+    2. **UNIQUENESS**:
+       - NO similar sentence structures
+       - NO repeating the same concept with different words
+       - Each quote must be distinctly different from others
+       - Avoid cliché phrases like "every day is a new day"
+
+    3. **QUALITY**:
+       - Use vivid imagery and metaphors
+       - Keep quotes concise (under 25 words)
+       - Make them thought-provoking, not generic
+       - Draw from diverse sources: literature, philosophy, poetry, wisdom traditions
+
+    Format (JSON only):
     [
         {
-            "text_cn": "Chinese translation (Warm and inspiring)",
-            "text_en": "Original English Quote",
+            "text_cn": "Chinese translation - warm and poetic",
+            "text_en": "Original English quote - unique and creative",
             "category": "morning"
         }
     ]

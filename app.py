@@ -48,11 +48,26 @@ def detail(quote_id):
         cursor.execute(sql, (quote_id,))
         quote = cursor.fetchone()
     conn.close()
-    
+
     if quote is None:
         abort(404)
-        
+
     return render_template('detail.html', quote=quote)
+
+@app.route('/category/<category_name>')
+def category(category_name):
+    """分类页：按分类展示语录"""
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cursor:
+            sql = "SELECT * FROM content_library WHERE category=%s AND status=1 ORDER BY id DESC LIMIT 20"
+            cursor.execute(sql, (category_name,))
+            quotes = cursor.fetchall()
+        conn.close()
+    except Exception as e:
+        print(f"数据库连接失败: {e}")
+        quotes = []
+    return render_template('index.html', quotes=quotes, current_category=category_name)
 
 # 为了防止 build 报错，我们可以给个假的 sitemap 路由或者加上逻辑
 @app.route('/sitemap.xml')

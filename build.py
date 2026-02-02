@@ -20,9 +20,17 @@ def detail():
         cursor.execute(sql)
         ids = cursor.fetchall()
     conn.close()
-    
+
     for item in ids:
         yield {'quote_id': item['id']}
+
+# 生成所有分类页
+@freezer.register_generator
+def category():
+    # 定义所有需要生成的分类
+    categories = ['morning', 'motivation', 'gratitude', 'mindfulness', 'positivity']
+    for category_name in categories:
+        yield {'category_name': category_name}
 
 if __name__ == '__main__':
     print("开始生成静态网站...")
@@ -39,6 +47,18 @@ if __name__ == '__main__':
                 new_path = os.path.join(quote_dir, f"{filename}.html")
                 os.rename(file_path, new_path)
         print("✅ 详情页扩展名已添加！")
+
+    # === 新增：给分类页添加 .html 扩展名 ===
+    category_dir = os.path.join('build', 'category')
+    if os.path.exists(category_dir):
+        print("正在给分类页添加 .html 扩展名...")
+        for filename in os.listdir(category_dir):
+            file_path = os.path.join(category_dir, filename)
+            # 跳过已有 .html 扩展名的文件和目录
+            if os.path.isfile(file_path) and not filename.endswith('.html'):
+                new_path = os.path.join(category_dir, f"{filename}.html")
+                os.rename(file_path, new_path)
+        print("✅ 分类页扩展名已添加！")
 
     # === 新增：自动生成 Vercel 配置文件 ===
     # 这告诉 Vercel：开启 Clean URLs (去掉 .html 后缀也能访问)

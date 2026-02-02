@@ -73,6 +73,95 @@ main {
     opacity: 0.95;
 }
 
+/* ==================== 分类导航 ==================== */
+.category-nav {
+    background: white;
+    padding: 30px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+.category-nav-title {
+    margin: 0 0 20px 0;
+    font-size: 1.5em;
+    color: #333;
+    text-align: center;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.category-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 15px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf3 100%);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+}
+
+.category-card.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+}
+
+.category-icon {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.category-name {
+    font-size: 1em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.category-card.active .category-name {
+    color: white;
+}
+
+.category-count {
+    font-size: 0.85em;
+    color: #666;
+}
+
+.category-card.active .category-count {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* ==================== 文章卡片标签 ==================== */
+.post-tag {
+    margin-bottom: 10px;
+}
+
+.tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 0.75em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 12px;
+}
+
 /* ==================== 文章网格布局 ==================== */
 .post-grid {
     display: grid;

@@ -15,6 +15,45 @@
     <p>Discover beautiful moments and inspiring stories for daily motivation</p>
 </section>
 
+<!-- Category Navigation -->
+<nav class="category-nav">
+    <div class="container">
+        <h2 class="category-nav-title">Browse by Category</h2>
+        <div class="category-grid">
+            <a href="/" class="category-card active">
+                <span class="category-icon">☀️</span>
+                <span class="category-name">All Quotes</span>
+                <span class="category-count">84</span>
+            </a>
+            <a href="/category/morning" class="category-card">
+                <span class="category-icon">🌅</span>
+                <span class="category-name">Morning</span>
+                <span class="category-count">Daily Inspiration</span>
+            </a>
+            <a href="/category/motivation" class="category-card">
+                <span class="category-icon">💪</span>
+                <span class="category-name">Motivation</span>
+                <span class="category-count">Stay Strong</span>
+            </a>
+            <a href="/category/gratitude" class="category-card">
+                <span class="category-icon">🙏</span>
+                <span class="category-name">Gratitude</span>
+                <span class="category-count">Be Thankful</span>
+            </a>
+            <a href="/category/mindfulness" class="category-card">
+                <span class="category-icon">🧘</span>
+                <span class="category-name">Mindfulness</span>
+                <span class="category-count">Find Peace</span>
+            </a>
+            <a href="/category/positivity" class="category-card">
+                <span class="category-icon">✨</span>
+                <span class="category-name">Positivity</span>
+                <span class="category-count">Stay Positive</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
 <!-- Google Ads 顶部横幅广告位 (728x90) -->
 <div class="hero-banner-ad ad-placeholder">
     <p>Google AdSense Banner Ad (728x90)</p>
@@ -30,6 +69,9 @@
             <img src="{{ quote.image_oss_url }}" alt="Morning Vibe - {{ quote.text_en[:50] }}" class="post-image" loading="lazy">
             {% endif %}
             <div class="post-content">
+                <div class="post-tag">
+                    <span class="tag">{{ quote.category|title }}</span>
+                </div>
                 <h2>
                     <a href="{{ url_for('detail', quote_id=quote.id) }}" title="{{ quote.text_en }}">
                         {{ quote.text_en[:50] }}{% if quote.text_en|length > 50 %}...{% endif %}

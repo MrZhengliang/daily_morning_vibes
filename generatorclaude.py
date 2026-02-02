@@ -1,3 +1,12 @@
+"""
+Daily Morning Vibes Content Generator
+使用 ZhipuAI GLM-4.7 生成早安语录
+
+重要提醒：
+- 详情页只显示英文内容（text_en）
+- 中文翻译（text_cn）仍然保存在数据库中，但不显示在前端
+- 保持内容的国际化和简洁性
+"""
 import os
 import json
 import time

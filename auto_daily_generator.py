@@ -31,9 +31,14 @@ CATEGORIES = [
 ]
 QUOTES_PER_CATEGORY = 3  # 每个分类生成3条
 
-# 日志配置
-LOG_DIR = "/var/log/daily_vibes"
-os.makedirs(LOG_DIR, exist_ok=True)
+# 日志配置 - 优先使用项目目录，如果是服务器环境则使用 /var/log
+try:
+    LOG_DIR = "/var/log/daily_vibes"
+    os.makedirs(LOG_DIR, exist_ok=True)
+except PermissionError:
+    LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+    os.makedirs(LOG_DIR, exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -43,6 +48,7 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+logger.info(f"日志目录: {LOG_DIR}")
 
 # ==================== 初始化 ====================
 client = ZhipuAI(api_key=ZHIPUAI_API_KEY)

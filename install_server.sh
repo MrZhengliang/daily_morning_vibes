@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================
 # Daily Morning Vibes - 服务器环境安装脚本
-# 适用于: CentOS 7/8, Ubuntu 18.04+
+# 适用于: CentOS 7/8, Ubuntu 18.04+, AliLinux 3
 # ============================================
 
 set -e
@@ -55,7 +55,7 @@ install_system_dependencies() {
     print_step "安装系统依赖..."
 
     case $OS in
-        centos|rhel|rocky|almalinux)
+        centos|rhel|rocky|almalinux|alinux)
             sudo yum install -y epel-release
             sudo yum install -y python39 python39-pip python39-devel git mysql-client \
                 libffi-devel openssl-devel gcc gcc-c++ make
@@ -79,7 +79,7 @@ install_image_dependencies() {
     print_step "安装图片处理依赖..."
 
     case $OS in
-        centos|rhel|rocky|almalinux)
+        centos|rhel|rocky|almalinux|alinux)
             sudo yum install -y libjpeg-turbo-devel zlib-devel freetype-devel lcms2-devel \
                 libwebp-devel tcl-devel tk-devel
             ;;

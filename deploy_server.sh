@@ -15,7 +15,7 @@ VENV_DIR="${PROJECT_DIR}/.venv"
 PYTHON_BIN="${VENV_DIR}/bin/python"
 
 # Git 配置
-GIT_REPO="git@github.com:981233589@qq.com/daily_morning_vibes.git"
+GIT_REPO="https://github.com/MrZhengliang/daily_morning_vibes.git"
 GIT_BRANCH="main"
 
 # ==================== 函数定义 ====================

@@ -424,8 +424,83 @@ footer a:hover {
     margin-top: 15px;
 }
 
+/* ==================== 分页导航 ==================== */
+.pagination {
+    margin: 40px 0;
+    padding: 20px 0;
+}
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.pagination-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.pagination-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.pagination-btn.disabled {
+    background: #e2e8f0;
+    color: #a0aec0;
+    cursor: not-allowed;
+}
+
+.pagination-btn.disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.pagination-info {
+    font-size: 0.95em;
+    color: #666;
+    font-weight: 500;
+}
+
+/* ==================== 返回顶部按钮 ==================== */
+.back-to-top {
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.back-to-top:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
 /* ==================== 响应式设计 ==================== */
 @media (max-width: 768px) {
+    .hero {
+        padding: 40px 15px;
+    }
+
     .hero h1 {
         font-size: 1.8em;
     }
@@ -434,9 +509,40 @@ footer a:hover {
         font-size: 1em;
     }
 
+    /* 分类导航移动端优化 */
+    .category-nav {
+        padding: 20px 15px;
+    }
+
+    .category-nav-title {
+        font-size: 1.3em;
+    }
+
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .category-card {
+        padding: 15px 10px;
+    }
+
+    .category-icon {
+        font-size: 2em;
+    }
+
+    .category-name {
+        font-size: 0.9em;
+    }
+
+    /* 文章网格 */
     .post-grid {
         grid-template-columns: 1fr;
         gap: 20px;
+    }
+
+    .post-image {
+        height: 200px;
     }
 
     .post-detail {
@@ -450,6 +556,34 @@ footer a:hover {
     .en-content {
         font-size: 1.1em;
         padding: 15px;
+    }
+
+    /* 分页移动端优化 */
+    .pagination {
+        margin: 30px 0;
+        padding: 15px 0;
+    }
+
+    .pagination-wrapper {
+        gap: 10px;
+    }
+
+    .pagination-btn {
+        padding: 10px 16px;
+        font-size: 0.9em;
+    }
+
+    .pagination-info {
+        font-size: 0.85em;
+    }
+
+    /* 返回顶部按钮移动端 */
+    .back-to-top {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
     }
 
     .footer-links {
@@ -467,16 +601,94 @@ footer a:hover {
         padding: 0 15px;
     }
 
-    .hero {
-        padding: 40px 15px;
+    /* 分类卡片更小屏幕优化 */
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
 
+    .category-card {
+        padding: 12px 8px;
+    }
+
+    .category-icon {
+        font-size: 1.8em;
+        margin-bottom: 5px;
+    }
+
+    .category-name {
+        font-size: 0.85em;
+    }
+
+    /* 文章卡片 */
     .post-card {
         border-radius: 8px;
     }
 
     .post-content {
         padding: 15px;
+    }
+
+    .post-content h2 {
+        font-size: 1.1em;
+    }
+
+    .post-excerpt {
+        font-size: 0.95em;
+    }
+
+    .read-more {
+        font-size: 0.9em;
+    }
+
+    /* 英雄区域 */
+    .hero {
+        padding: 30px 15px;
+        margin-bottom: 20px;
+    }
+
+    .hero h1 {
+        font-size: 1.5em;
+    }
+
+    .hero p {
+        font-size: 0.95em;
+    }
+
+    /* 分页更紧凑 */
+    .pagination-wrapper {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pagination-btn {
+        width: 100%;
+        text-align: center;
+        padding: 12px;
+    }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 360px) {
+    .category-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .category-card {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 10px;
+        padding: 10px 15px;
+    }
+
+    .category-icon {
+        font-size: 1.5em;
+        margin-bottom: 0;
+    }
+
+    .category-name {
+        font-size: 0.95em;
     }
 }
 

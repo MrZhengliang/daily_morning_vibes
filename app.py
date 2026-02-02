@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, abort
+from flask import Flask, render_template, abort, request
 import pymysql
 import pymysql.cursors
 from dotenv import load_dotenv
@@ -26,18 +26,35 @@ def get_db_connection():
 
 @app.route('/')
 def index():
-    """首页：展示最新的 20 条语录"""
+    """首页：展示最新的 20 条语录，支持分页"""
+    page = int(request.args.get('page', 1))
+    per_page = 20
+    offset = (page - 1) * per_page
+
     try:
         conn = get_db_connection()
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM content_library WHERE status=1 ORDER BY id DESC LIMIT 20"
-            cursor.execute(sql)
+            # 获取总数
+            cursor.execute("SELECT COUNT(*) as total FROM content_library WHERE status=1")
+            total = cursor.fetchone()['total']
+
+            # 获取当前页数据
+            sql = "SELECT * FROM content_library WHERE status=1 ORDER BY id DESC LIMIT %s OFFSET %s"
+            cursor.execute(sql, (per_page, offset))
             quotes = cursor.fetchall()
+
+            # 计算总页数
+            total_pages = (total + per_page - 1) // per_page
         conn.close()
     except Exception as e:
         print(f"数据库连接失败: {e}")
         quotes = []
-    return render_template('index.html', quotes=quotes)
+        total_pages = 1
+
+    return render_template('index.html',
+                          quotes=quotes,
+                          current_page=page,
+                          total_pages=total_pages)
 
 @app.route('/quote/<int:quote_id>')
 def detail(quote_id):
@@ -56,18 +73,36 @@ def detail(quote_id):
 
 @app.route('/category/<category_name>')
 def category(category_name):
-    """分类页：按分类展示语录"""
+    """分类页：按分类展示语录，支持分页"""
+    page = int(request.args.get('page', 1))
+    per_page = 20
+    offset = (page - 1) * per_page
+
     try:
         conn = get_db_connection()
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM content_library WHERE category=%s AND status=1 ORDER BY id DESC LIMIT 20"
-            cursor.execute(sql, (category_name,))
+            # 获取总数
+            cursor.execute("SELECT COUNT(*) as total FROM content_library WHERE category=%s AND status=1", (category_name,))
+            total = cursor.fetchone()['total']
+
+            # 获取当前页数据
+            sql = "SELECT * FROM content_library WHERE category=%s AND status=1 ORDER BY id DESC LIMIT %s OFFSET %s"
+            cursor.execute(sql, (category_name, per_page, offset))
             quotes = cursor.fetchall()
+
+            # 计算总页数
+            total_pages = (total + per_page - 1) // per_page
         conn.close()
     except Exception as e:
         print(f"数据库连接失败: {e}")
         quotes = []
-    return render_template('index.html', quotes=quotes, current_category=category_name)
+        total_pages = 1
+
+    return render_template('index.html',
+                          quotes=quotes,
+                          current_category=category_name,
+                          current_page=page,
+                          total_pages=total_pages)
 
 # 为了防止 build 报错，我们可以给个假的 sitemap 路由或者加上逻辑
 @app.route('/sitemap.xml')

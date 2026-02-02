@@ -5,6 +5,7 @@
 {% block head %}
 <meta name="description" content="Start your day with inspiring morning quotes and positive vibes. Daily motivation for a better life.">
 <meta name="keywords" content="morning quotes, daily inspiration, positive vibes, motivational quotes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Google Adsense 将在这里添加 -->
 {% endblock %}
 
@@ -23,45 +24,39 @@
             <a href="/" class="category-card {% if not current_category %}active{% endif %}">
                 <span class="category-icon">☀️</span>
                 <span class="category-name">All Quotes</span>
-                <span class="category-count">84</span>
             </a>
             <a href="/category/morning" class="category-card {% if current_category == 'morning' %}active{% endif %}">
                 <span class="category-icon">🌅</span>
                 <span class="category-name">Morning</span>
-                <span class="category-count">Daily Inspiration</span>
             </a>
             <a href="/category/motivation" class="category-card {% if current_category == 'motivation' %}active{% endif %}">
                 <span class="category-icon">💪</span>
                 <span class="category-name">Motivation</span>
-                <span class="category-count">Stay Strong</span>
             </a>
             <a href="/category/gratitude" class="category-card {% if current_category == 'gratitude' %}active{% endif %}">
                 <span class="category-icon">🙏</span>
                 <span class="category-name">Gratitude</span>
-                <span class="category-count">Be Thankful</span>
             </a>
             <a href="/category/mindfulness" class="category-card {% if current_category == 'mindfulness' %}active{% endif %}">
                 <span class="category-icon">🧘</span>
                 <span class="category-name">Mindfulness</span>
-                <span class="category-count">Find Peace</span>
             </a>
             <a href="/category/positivity" class="category-card {% if current_category == 'positivity' %}active{% endif %}">
                 <span class="category-icon">✨</span>
                 <span class="category-name">Positivity</span>
-                <span class="category-count">Stay Positive</span>
             </a>
         </div>
     </div>
 </nav>
 
-<!-- Google Ads 顶部横幅广告位 (728x90) -->
+<!-- Google Ads 顶部横幅广告位 -->
 <div class="hero-banner-ad ad-placeholder">
     <p>Google AdSense Banner Ad (728x90)</p>
     <p>Place your ad code here</p>
 </div>
 
-<!-- Content Grid with Ads -->
-<div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
+<!-- Content Grid -->
+<div class="content-wrapper">
     <div class="post-grid">
         {% for quote in quotes %}
         <article class="post-card">
@@ -73,7 +68,7 @@
                     <span class="tag">{{ quote.category|title }}</span>
                 </div>
                 <h2>
-                    <a href="{{ url_for('detail', quote_id=quote.id) }}" title="{{ quote.text_en }}">
+                    <a href="/quote/{{ quote.id }}" title="{{ quote.text_en }}">
                         {{ quote.text_en[:50] }}{% if quote.text_en|length > 50 %}...{% endif %}
                     </a>
                 </h2>
@@ -81,16 +76,89 @@
                     <time datetime="{{ quote.gmt_create }}">{{ quote.gmt_create.strftime('%Y-%m-%d') }}</time>
                 </p>
                 <p class="post-excerpt">{{ quote.text_en[:150] }}...</p>
-                <a href="{{ url_for('detail', quote_id=quote.id) }}" class="read-more" aria-label="Read more about {{ quote.text_en[:30] }}">Read More →</a>
+                <a href="/quote/{{ quote.id }}" class="read-more" aria-label="Read more about {{ quote.text_en[:30] }}">Read More →</a>
             </div>
         </article>
         {% endfor %}
     </div>
 </div>
 
+<!-- 分页导航 -->
+{% if total_pages > 1 %}
+<nav class="pagination" aria-label="Pagination">
+    <div class="container">
+        <div class="pagination-wrapper">
+            {% if current_page > 1 %}
+            <a href="{% if current_category %}/category/{{ current_category }}?page={{ current_page - 1 }}{% else %}/?page={{ current_page - 1 }}{% endif %}" class="pagination-btn prev" aria-label="Previous page">
+                ← Previous
+            </a>
+            {% else %}
+            <span class="pagination-btn disabled">← Previous</span>
+            {% endif %}
+
+            <span class="pagination-info">
+                Page {{ current_page }} of {{ total_pages }}
+            </span>
+
+            {% if current_page < total_pages %}
+            <a href="{% if current_category %}/category/{{ current_category }}?page={{ current_page + 1 }}{% else %}/?page={{ current_page + 1 }}{% endif %}" class="pagination-btn next" aria-label="Next page">
+                Next →
+            </a>
+            {% else %}
+            <span class="pagination-btn disabled">Next →</span>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+{% endif %}
+
 <!-- Google Ads 底部横幅广告位 -->
 <div class="ad-placeholder bottom-ad">
     <p>Google AdSense Bottom Banner Ad</p>
     <p>Place your ad code here</p>
 </div>
+
+<!-- 返回顶部按钮 -->
+<button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 返回顶部功能
+document.addEventListener('DOMContentLoaded', function() {
+    const backToTopBtn = document.getElementById('backToTop');
+
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            backToTopBtn.style.display = 'block';
+        } else {
+            backToTopBtn.style.display = 'none';
+        }
+    });
+
+    backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+});
+
+// 图片懒加载优化
+if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.src;
+                observer.unobserve(img);
+            }
+        });
+    });
+
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+        imageObserver.observe(img);
+    });
+}
+</script>
 {% endblock %}

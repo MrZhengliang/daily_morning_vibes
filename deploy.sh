@@ -11,9 +11,6 @@ python3 build.py
 # 我们利用 git subtree 或者暴力一点，只把 build 目录变成 git 仓库推上去
 # 这里用最简单稳妥的方法：把 build 目录推送到 gh-pages 分支
 
-cd build
-git init
-git checkout -b main
 git add .
 git commit -m "Auto deploy $(date)"
 # 注意：这里会强制覆盖远程仓库，适合静态站

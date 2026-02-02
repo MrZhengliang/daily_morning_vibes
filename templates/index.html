@@ -2,25 +2,53 @@
 
 {% block title %}Home - Daily Morning Vibes{% endblock %}
 
+{% block head %}
+<meta name="description" content="Start your day with inspiring morning quotes and positive vibes. Daily motivation for a better life.">
+<meta name="keywords" content="morning quotes, daily inspiration, positive vibes, motivational quotes">
+<!-- Google Adsense 将在这里添加 -->
+{% endblock %}
+
 {% block content %}
+<!-- Hero Section -->
 <section class="hero">
     <h1>Start Your Day Right</h1>
-    <p>Discover beautiful moments and inspiring stories.</p>
+    <p>Discover beautiful moments and inspiring stories for daily motivation</p>
 </section>
 
-<div class="post-grid">
-    {% for quote in quotes %}
-    <article class="post-card">
-        {% if quote.image_oss_url %}
-        <img src="{{ quote.image_oss_url }}" alt="Morning Vibe" class="post-image">
-        {% endif %}
-        <div class="post-content">
-            <h2><a href="{{ url_for('detail', quote_id=quote.id) }}">{{ quote.text_en[:50] }}{% if quote.text_en|length > 50 %}...{% endif %}</a></h2>
-            <p class="post-date">{{ quote.gmt_create }}</p>
-            <p class="post-excerpt">{{ quote.text_en[:150] }}...</p>
-            <a href="{{ url_for('detail', quote_id=quote.id) }}" class="read-more">Read More</a>
-        </div>
-    </article>
-    {% endfor %}
+<!-- Google Ads 顶部横幅广告位 (728x90) -->
+<div class="hero-banner-ad ad-placeholder">
+    <p>Google AdSense Banner Ad (728x90)</p>
+    <p>Place your ad code here</p>
+</div>
+
+<!-- Content Grid with Ads -->
+<div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
+    <div class="post-grid">
+        {% for quote in quotes %}
+        <article class="post-card">
+            {% if quote.image_oss_url %}
+            <img src="{{ quote.image_oss_url }}" alt="Morning Vibe - {{ quote.text_en[:50] }}" class="post-image" loading="lazy">
+            {% endif %}
+            <div class="post-content">
+                <h2>
+                    <a href="{{ url_for('detail', quote_id=quote.id) }}" title="{{ quote.text_en }}">
+                        {{ quote.text_en[:50] }}{% if quote.text_en|length > 50 %}...{% endif %}
+                    </a>
+                </h2>
+                <p class="post-date">
+                    <time datetime="{{ quote.gmt_create }}">{{ quote.gmt_create.strftime('%Y-%m-%d') }}</time>
+                </p>
+                <p class="post-excerpt">{{ quote.text_en[:150] }}...</p>
+                <a href="{{ url_for('detail', quote_id=quote.id) }}" class="read-more" aria-label="Read more about {{ quote.text_en[:30] }}">Read More →</a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Google Ads 底部横幅广告位 -->
+<div class="ad-placeholder bottom-ad">
+    <p>Google AdSense Bottom Banner Ad</p>
+    <p>Place your ad code here</p>
 </div>
 {% endblock %}

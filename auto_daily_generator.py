@@ -156,36 +156,43 @@ def fetch_quotes_from_zhipuai():
     """
 
     user_prompt = f"""
-    Generate {total_quotes} UNIQUE quotes across {len(CATEGORIES)} categories.
+    Generate {total_quotes} UNIQUE articles across {len(CATEGORIES)} categories for an English-speaking audience.
 
     **Categories:**
     {', '.join(CATEGORIES)}
 
     **Requirements:**
-    - Generate exactly {QUOTES_PER_CATEGORY} quotes for EACH category
-    - Each quote must be UNIQUE and distinctly different
-    - Keep quotes concise (under 25 words)
-    - Use vivid imagery and metaphors
-    - Avoid cliché phrases
-    - Draw from diverse sources: literature, philosophy, poetry, wisdom traditions
+    - Generate exactly {QUOTES_PER_CATEGORY} articles for EACH category
+    - Each article must include:
+      1. A compelling quote (15-25 words)
+      2. A body paragraph expanding on the quote's meaning (150-250 words)
+    - English must be natural, engaging, and native-quality
+    - Use vivid imagery, metaphors, and strong verbs
+    - Avoid cliché phrases and overused expressions
+    - The body should be inspiring, thoughtful, and SEO-friendly
+    - The Chinese translation (text_cn) must be an ACCURATE translation of the English quote
 
     **Category Themes:**
     - morning: sunrise, new beginnings, fresh starts, dawn
     - motivation: strength, perseverance, achieving goals, success
     - gratitude: thankfulness, appreciation, counting blessings
     - mindfulness: being present, meditation, inner peace, awareness
-    - positivity: optimism, positive thinking, spreading joy
+    - positivity: optimism, positive thinking, spreading joy, hope
 
     Format (JSON only):
     [
         {{
-            "text_cn": "Chinese translation - warm and poetic",
-            "text_en": "Original English quote - unique and creative",
+            "text_en": "Compelling English quote (15-25 words)",
+            "text_en_content": "Expanded article body (150-250 words) - inspiring and thoughtful paragraphs",
+            "text_cn": "Accurate Chinese translation",
             "category": "one of: {', '.join(CATEGORIES)}"
         }}
     ]
 
-    IMPORTANT: Generate exactly {total_quotes} quotes, {QUOTES_PER_CATEGORY} for each of the {len(CATEGORIES)} categories.
+    CRITICAL:
+    1. Generate exactly {total_quotes} articles
+    2. text_en_content MUST be 150-250 words expanding on the quote
+    3. text_cn MUST be the translation of text_en
     """
 
     max_retries = 3
@@ -208,12 +215,24 @@ def fetch_quotes_from_zhipuai():
             clean_text = content.replace('```json', '').replace('```', '').strip()
             quotes = json.loads(clean_text)
 
-            # 验证数量
-            if len(quotes) < total_quotes:
-                logger.warning(f"获取 {len(quotes)} 条，期望 {total_quotes} 条")
+            # 验证并补充缺失字段
+            valid_quotes = []
+            for q in quotes:
+                if isinstance(q, dict) and 'text_en' in q and 'category' in q:
+                    if 'text_cn' not in q or not q['text_cn']:
+                        q['text_cn'] = q['text_en']
+                    if 'text_en_content' not in q or not q['text_en_content'] or len(q.get('text_en_content', '')) < 50:
+                        q['text_en_content'] = q['text_en']
+                    valid_quotes.append(q)
+                else:
+                    logger.warning(f"跳过无效数据: {q}")
 
-            logger.info(f"成功获取 {len(quotes)} 条语录")
-            return quotes
+            # 验证数量
+            if len(valid_quotes) < total_quotes:
+                logger.warning(f"获取 {len(valid_quotes)} 条，期望 {total_quotes} 条")
+
+            logger.info(f"成功获取 {len(valid_quotes)} 条语录")
+            return valid_quotes
 
         except json.JSONDecodeError as e:
             logger.error(f"JSON解析失败 (尝试 {attempt + 1}): {e}")
@@ -288,12 +307,13 @@ def main():
                 # 数据库URL
                 db_image_url = f"/static/images/{filename}"
 
-                # 入库
+                # 入库 - 包含 text_en_content
+                text_en_content = item.get('text_en_content', item['text_en'])
                 sql = """
-                INSERT INTO content_library (category, text_cn, text_en, image_oss_url, status)
-                VALUES (%s, %s, %s, %s, 1)
+                INSERT INTO content_library (category, text_cn, text_en, text_en_content, image_oss_url, status)
+                VALUES (%s, %s, %s, %s, %s, 1)
                 """
-                cursor.execute(sql, (category, item['text_cn'], item['text_en'], db_image_url))
+                cursor.execute(sql, (category, item['text_cn'], item['text_en'], text_en_content, db_image_url))
                 conn.commit()
 
                 category_count[category] += 1

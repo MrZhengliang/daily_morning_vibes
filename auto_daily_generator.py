@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-自动每日内容生成脚本 - 每个分类生成3条内容
-5个分类 x 3条 = 15条内容/天
+自动每日内容生成脚本 - 使用硅基流动AI
 """
 import os
 import sys
@@ -14,14 +13,21 @@ import textwrap
 import shutil
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
+from openai import OpenAI
 from config import Config
-from zhipuai import ZhipuAI
 
 # ==================== 配置区域 ====================
-# ZhipuAI API Key
-ZHIPUAI_API_KEY = "9169ae8a03ae409c8739f6c5e08bb828.JgwMF5y5nDrpaaay"
+# 禁用代理
+os.environ['HTTP_PROXY'] = ''
+os.environ['HTTPS_PROXY'] = ''
 
-# 分类配置 - 每个分类生成3条
+# 初始化硅基流动客户端
+client = OpenAI(
+    api_key=Config.SILICONFLOW_API_KEY,
+    base_url=Config.SILICONFLOW_BASE_URL
+)
+
+# 分类配置
 CATEGORIES = [
     "morning",
     "motivation",
@@ -31,13 +37,9 @@ CATEGORIES = [
 ]
 QUOTES_PER_CATEGORY = 3  # 每个分类生成3条
 
-# 日志配置 - 优先使用项目目录，如果是服务器环境则使用 /var/log
-try:
-    LOG_DIR = "/var/log/daily_vibes"
-    os.makedirs(LOG_DIR, exist_ok=True)
-except PermissionError:
-    LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
-    os.makedirs(LOG_DIR, exist_ok=True)
+# 日志配置
+LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,10 +50,6 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
-logger.info(f"日志目录: {LOG_DIR}")
-
-# ==================== 初始化 ====================
-client = ZhipuAI(api_key=ZHIPUAI_API_KEY)
 
 
 def get_db_connection():
@@ -146,7 +144,7 @@ def generate_simple_image(text_en, filename):
     return local_path
 
 
-def fetch_quotes_from_zhipuai():
+def fetch_quotes_from_siliconflow():
     """调用 ZhipuAI 生成每个分类3条内容"""
     total_quotes = len(CATEGORIES) * QUOTES_PER_CATEGORY
 
@@ -198,21 +196,31 @@ def fetch_quotes_from_zhipuai():
     max_retries = 3
     for attempt in range(max_retries):
         try:
-            logger.info(f"调用 ZhipuAI API (尝试 {attempt + 1}/{max_retries})...")
+            logger.info(f"调用硅基流动API (尝试 {attempt + 1}/{max_retries})...")
             response = client.chat.completions.create(
-                model="glm-4.7",
+                model="Qwen/Qwen2.5-7B-Instruct",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
-                thinking={"type": "enabled"},
-                max_tokens=65536,
-                temperature=1.0,
-                stream=False
+                max_tokens=4096,
+                temperature=0.9,
             )
 
             content = response.choices[0].message.content
-            clean_text = content.replace('```json', '').replace('```', '').strip()
+
+            # 清理 markdown 标记
+            clean_text = content.strip()
+            if clean_text.startswith('```'):
+                lines = clean_text.split('\n')
+                if lines[0].startswith('```json'):
+                    clean_text = '\n'.join(lines[1:])
+                elif lines[0].startswith('```'):
+                    clean_text = '\n'.join(lines[1:])
+                if clean_text.endswith('```'):
+                    clean_text = clean_text[:-3]
+                clean_text = clean_text.strip()
+
             quotes = json.loads(clean_text)
 
             # 验证并补充缺失字段
@@ -261,7 +269,7 @@ def main():
 
     try:
         # 1. 获取语录
-        quotes = fetch_quotes_from_zhipuai()
+        quotes = fetch_quotes_from_siliconflow()
         if not quotes:
             logger.error("未获取到内容，任务终止")
             return False

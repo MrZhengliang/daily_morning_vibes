@@ -4,7 +4,9 @@
       "Bash(python3 auto_daily_generator.py 2>&1 | head -100)",
       "Bash(python3 << 'EOF'\nimport pymysql\nfrom config import Config\n\nconn = Config.get_db_connection\\(\\)\ncursor = conn.cursor\\(pymysql.cursors.DictCursor\\)\n\n# 查询最新生成的一条数据\nsql = \"SELECT id, category, text_en, text_en_content FROM content_library ORDER BY id DESC LIMIT 1\"\ncursor.execute\\(sql\\)\nresult = cursor.fetchone\\(\\)\n\nif result:\n    print\\(f\"ID: {result['id']}\"\\)\n    print\\(f\"分类: {result['category']}\"\\)\n    print\\(f\"\\\\n语录 \\(text_en\\):\"\\)\n    print\\(f\"{result['text_en']}\"\\)\n    print\\(f\"\\\\n正文 \\(text_en_content\\) 长度: {len\\(result.get\\('text_en_content', ''\\)\\)} 字符\"\\)\n    print\\(f\"\\\\n正文内容 \\(前500字符\\):\"\\)\n    print\\(f\"{result.get\\('text_en_content', '\\(空\\)'\\)[:500]}...\"\\)\nelse:\n    print\\(\"没有数据\"\\)\n\ncursor.close\\(\\)\nconn.close\\(\\)\nEOF)",
       "Bash(python3 << 'EOF'\nimport pymysql\nfrom config import Config\n\nconn = Config.get_db_connection\\(\\)\ncursor = conn.cursor\\(pymysql.cursors.DictCursor\\)\n\n# 查询最新生成的3条数据\nsql = \"SELECT id, category, text_en, text_en_content FROM content_library ORDER BY id DESC LIMIT 3\"\ncursor.execute\\(sql\\)\nresults = cursor.fetchall\\(\\)\n\nfor r in results:\n    content_len = len\\(r.get\\('text_en_content', ''\\)\\)\n    word_count = len\\(r.get\\('text_en_content', ''\\).split\\(\\)\\)\n    print\\(f\"\\\\n{'='*60}\"\\)\n    print\\(f\"ID: {r['id']} | 分类: {r['category']}\"\\)\n    print\\(f\"语录: {r['text_en'][:60]}...\"\\)\n    print\\(f\"正文: {content_len} 字符, 约 {word_count} 词\"\\)\n    print\\(f\"正文预览: {r.get\\('text_en_content', ''\\)[:200]}...\"\\)\n\ncursor.close\\(\\)\nconn.close\\(\\)\nEOF)",
-      "Bash(python3 build.py 2>&1 | head -30)"
+      "Bash(python3 build.py 2>&1 | head -30)",
+      "Bash(rm -f build/quote/991.html build/quote/992.html build/quote/993.html build/quote/994.html build/quote/995.html\necho \"已删除 991-995.html\"\nls build/quote/99*.html 2>/dev/null || echo \"99x页面已清理\")",
+      "Bash(grep \"99[1-5]\" build/index.html build/category/*.html 2>/dev/null || echo \"✓ 已清理干净\")"
     ]
   }
 }

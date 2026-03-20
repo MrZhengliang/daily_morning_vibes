@@ -51,6 +51,21 @@ check_venv() {
     log "✓ 虚拟环境检查通过"
 }
 
+# 安装依赖包
+install_dependencies() {
+    log ""
+    log "检查并安装 Python 依赖包..."
+    cd "${PROJECT_DIR}"
+
+    if [ -f "requirements.txt" ]; then
+        "${VENV_DIR}/bin/pip" install -q --upgrade pip || log "警告: pip 升级失败"
+        "${VENV_DIR}/bin/pip" install -q -r requirements.txt || error_exit "依赖安装失败"
+        log "✓ 依赖包安装完成"
+    else
+        error_exit "requirements.txt 文件不存在"
+    fi
+}
+
 # 步骤1: 生成内容
 generate_content() {
     log ""
@@ -112,6 +127,7 @@ cleanup_old_logs() {
 main() {
     setup_logging
     check_venv
+    install_dependencies
 
     local start_time=$(date +%s)
 

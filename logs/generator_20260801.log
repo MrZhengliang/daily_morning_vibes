@@ -1,0 +1,26 @@
+2026-08-01 05:00:03,893 - INFO - ============================================================
+2026-08-01 05:00:03,894 - INFO - 开始每日内容生成任务 - 2026-08-01 05:00:03
+2026-08-01 05:00:03,894 - INFO - 目标: 5 个分类 x 3 条 = 15 条内容
+2026-08-01 05:00:03,894 - INFO - 调用硅基流动API (尝试 1/3)...
+2026-08-01 05:00:05,393 - INFO - HTTP Request: POST https://api.siliconflow.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-01 05:00:05,406 - ERROR - JSON解析失败 (尝试 1): Invalid control character at: line 3 column 81 (char 88)
+2026-08-01 05:00:10,410 - INFO - 调用硅基流动API (尝试 2/3)...
+2026-08-01 05:02:09,000 - INFO - HTTP Request: POST https://api.siliconflow.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-01 05:02:09,002 - ERROR - JSON解析失败 (尝试 2): Unterminated string starting at: line 4 column 28 (char 228)
+2026-08-01 05:02:14,007 - INFO - 调用硅基流动API (尝试 3/3)...
+2026-08-01 05:03:19,091 - INFO - HTTP Request: POST https://api.siliconflow.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-01 05:03:19,094 - ERROR - JSON解析失败 (尝试 3): Invalid control character at: line 3 column 88 (char 95)
+2026-08-01 05:03:19,094 - ERROR - 任务执行失败: Invalid control character at: line 3 column 88 (char 95)
+2026-08-01 05:03:19,095 - ERROR - Traceback (most recent call last):
+  File "/opt/daily_morning_vibes/auto_daily_generator.py", line 272, in main
+    quotes = fetch_quotes_from_siliconflow()
+  File "/opt/daily_morning_vibes/auto_daily_generator.py", line 224, in fetch_quotes_from_siliconflow
+    quotes = json.loads(clean_text)
+  File "/usr/local/python3/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/usr/local/python3/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/usr/local/python3/lib/python3.9/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+json.decoder.JSONDecodeError: Invalid control character at: line 3 column 88 (char 95)
+
